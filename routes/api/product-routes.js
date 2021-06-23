@@ -1,12 +1,18 @@
 const router = require('express').Router();
 const { Product, Category, Tag, ProductTag } = require('../../models');
-
+const colors = require('colors')
 // The `/api/products` endpoint
 
 // get all products
 router.get('/', (req, res) => {
   // find all products
   // be sure to include its associated Category and Tag data
+  const query = "SELECT * FROM ecommerce_db.product; SELECT p.id as 'Product ID', p.price as 'Price', p.stock as 'Stock', category.id as 'Cat. ID' ,  Tag.id as 'Tag ID', category.category_name as 'Category'FROM product AS p LEFT JOIN category ON p.category_id = category.id LEFT JOIN tag as Tag ON Tag.id = category.id;"
+  connection.query(query, (err, res) => {
+    if (err) throw err;
+    console.log('All products.'.magenta);
+    console.table(res);
+  });
 });
 
 // get one product

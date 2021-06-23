@@ -10,20 +10,21 @@ class Product extends Model { }
 Product.init(
   {
     product_name: {
-      field: 'product_name',
-      type: Sequelize.STRING,
+      // field: 'product_name',
+      type: DataTypes.STRING,
     },
     price: {
-      field: 'price',
-      type: Sequelize.DECIMAL
+      // field: 'price',
+      type: DataTypes.DECIMAL
     },
     stock: {
-      field: 'stock',
-      type: Sequelize.INTEGER
+      // field: 'stock',
+      type: DataTypes.INTEGER
     },
     category_id: {
-      field: 'category_id',
-      type: Sequelize.STRING
+      // field: 'category_id',
+      type: DataTypes.STRING,
+      primarykey: true
     },
   },
   {

@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const { Product, Category, Tag, ProductTag } = require('../../models');
-const colors = require('colors')
+
 
 // The `/api/products` endpoint
 
@@ -8,20 +8,14 @@ const colors = require('colors')
 router.get('/', (req, res) => {
   // find all products
   // be sure to include its associated Category and Tag data
-  // const query = "SELECT * FROM ecommerce_db.product; SELECT p.id as 'Product ID', p.price as 'Price', p.stock as 'Stock', category.id as 'Cat. ID' ,  Tag.id as 'Tag ID', category.category_name as 'Category'FROM product AS p LEFT JOIN category ON p.category_id = category.id LEFT JOIN tag as Tag ON Tag.id = category.id;"
-  // connection.query(query, (err, res) => {
-  //   if (err) throw err;
-  //   console.log('All products.'.magenta);
-  //   console.table(res);
-  // });
+
   try {
     const productData = Product.findAll({
-      include: { model: Product },
+      // include: [{ model: Product }],
       attributes: {
         include: [
-
-          sequelize.literal(
-            "(SELECT COUNT (*) FROM ecommerce_db.product; SELECT p.id as 'Product ID', p.price as 'Price', p.stock as 'Stock', category.id as 'Cat. ID' ,  Tag.id as 'Tag ID', category.category_name as 'Category'FROM product AS p LEFT JOIN category ON p.category_id = category.id LEFT JOIN tag as Tag ON Tag.id = category.id;)"
+          sequelize.literal(// Query works properly. Not sure whats going on here. Its returning 500. Syntax is probably all wrong. Researching...
+            "(SELECT COUNT * FROM ecommerce_db.product; SELECT p.id as 'Product ID', p.price as 'Price', p.stock as 'Stock', category.id as 'Cat. ID' ,  Tag.id as 'Tag ID', category.category_name as 'Category'FROM product AS p LEFT JOIN category ON p.category_id = category.id LEFT JOIN tag as Tag ON Tag.id = category.id;)"
           ),
           // 'allProducts',
 
@@ -30,93 +24,94 @@ router.get('/', (req, res) => {
     });
     res.status(200).json(productData);
   } catch (err) {
+    console.log("Server error 500")
     res.status(500).json(err);
   }
 
 });
 
 // get one product
-router.get('/:id', (req, res) => {
-  // find a single product by its `id`
-  // be sure to include its associated Category and Tag data
-});
+// router.get('/:id', (req, res) => {
+//   // find a single product by its `id`
+//   // be sure to include its associated Category and Tag data
+// });
 
-// create new product
-router.post('/', (req, res) => {
-  /* req.body should look like this...
-    {
-      product_name: "Basketball",
-      price: 200.00,
-      stock: 3,
-      tagIds: [1, 2, 3, 4]
-    }
-  */
-  Product.create(req.body)
-    .then((product) => {
-      // if there's product tags, we need to create pairings to bulk create in the ProductTag model
-      if (req.body.tagIds.length) {
-        const productTagIdArr = req.body.tagIds.map((tag_id) => {
-          return {
-            product_id: product.id,
-            tag_id,
-          };
-        });
-        return ProductTag.bulkCreate(productTagIdArr);
-      }
-      // if no product tags, just respond
-      res.status(200).json(product);
-    })
-    .then((productTagIds) => res.status(200).json(productTagIds))
-    .catch((err) => {
-      console.log(err);
-      res.status(400).json(err);
-    });
-});
+// // create new product
+// router.post('/', (req, res) => {
+//   /* req.body should look like this...
+//     {
+//       product_name: "Basketball",
+//       price: 200.00,
+//       stock: 3,
+//       tagIds: [1, 2, 3, 4]
+//     }
+//   */
+//   Product.create(req.body)
+//     .then((product) => {
+//       // if there's product tags, we need to create pairings to bulk create in the ProductTag model
+//       if (req.body.tagIds.length) {
+//         const productTagIdArr = req.body.tagIds.map((tag_id) => {
+//           return {
+//             product_id: product.id,
+//             tag_id,
+//           };
+//         });
+//         return ProductTag.bulkCreate(productTagIdArr);
+//       }
+//       // if no product tags, just respond
+//       res.status(200).json(product);
+//     })
+//     .then((productTagIds) => res.status(200).json(productTagIds))
+//     .catch((err) => {
+//       console.log(err);
+//       res.status(400).json(err);
+//     });
+// });
 
 // update product
-router.put('/:id', (req, res) => {
-  // update product data
-  Product.update(req.body, {
-    where: {
-      id: req.params.id,
-    },
-  })
-    .then((product) => {
-      // find all associated tags from ProductTag
-      return ProductTag.findAll({ where: { product_id: req.params.id } });
-    })
-    .then((productTags) => {
-      // get list of current tag_ids
-      const productTagIds = productTags.map(({ tag_id }) => tag_id);
-      // create filtered list of new tag_ids
-      const newProductTags = req.body.tagIds
-        .filter((tag_id) => !productTagIds.includes(tag_id))
-        .map((tag_id) => {
-          return {
-            product_id: req.params.id,
-            tag_id,
-          };
-        });
-      // figure out which ones to remove
-      const productTagsToRemove = productTags
-        .filter(({ tag_id }) => !req.body.tagIds.includes(tag_id))
-        .map(({ id }) => id);
+// router.put('/:id', (req, res) => {
+// update product data
+//   Product.update(req.body, {
+//     where: {
+//       id: req.params.id,
+//     },
+//   })
+//     .then((product) => {
+//       // find all associated tags from ProductTag
+//       return ProductTag.findAll({ where: { product_id: req.params.id } });
+//     })
+//     .then((productTags) => {
+//       // get list of current tag_ids
+//       const productTagIds = productTags.map(({ tag_id }) => tag_id);
+//       // create filtered list of new tag_ids
+//       const newProductTags = req.body.tagIds
+//         .filter((tag_id) => !productTagIds.includes(tag_id))
+//         .map((tag_id) => {
+//           return {
+//             product_id: req.params.id,
+//             tag_id,
+//           };
+//         });
+//       // figure out which ones to remove
+//       const productTagsToRemove = productTags
+//         .filter(({ tag_id }) => !req.body.tagIds.includes(tag_id))
+//         .map(({ id }) => id);
 
-      // run both actions
-      return Promise.all([
-        ProductTag.destroy({ where: { id: productTagsToRemove } }),
-        ProductTag.bulkCreate(newProductTags),
-      ]);
-    })
-    .then((updatedProductTags) => res.json(updatedProductTags))
-    .catch((err) => {
-      // console.log(err);
-      res.status(400).json(err);
-    });
-});
+//       // run both actions
+//       return Promise.all([
+//         ProductTag.destroy({ where: { id: productTagsToRemove } }),
+//         ProductTag.bulkCreate(newProductTags),
+//       ]);
+//     })
+//     .then((updatedProductTags) => res.json(updatedProductTags))
+//     .catch((err) => {
+//       // console.log(err);
+//       res.status(400).json(err);
+//     });
+// });
 
-router.delete('/:id', (req, res) => {
-  // delete one product by its `id` value
-});
+// router.delete('/:id', (req, res) => {
+//   // delete one product by its `id` value
+// });
 
 module.exports = router;

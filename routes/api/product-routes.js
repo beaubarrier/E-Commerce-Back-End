@@ -12,15 +12,15 @@ router.get('/', (req, res) => {
   try {
     const productData = Product.findAll({
       // include: [{ model: Product }],
-      attributes: {
-        include: [
-          sequelize.literal(// Query works properly. Not sure whats going on here. Its returning 500. Syntax is probably all wrong. Researching...
-            "(SELECT COUNT * FROM ecommerce_db.product; SELECT p.id as 'Product ID', p.price as 'Price', p.stock as 'Stock', category.id as 'Cat. ID' ,  Tag.id as 'Tag ID', category.category_name as 'Category'FROM product AS p LEFT JOIN category ON p.category_id = category.id LEFT JOIN tag as Tag ON Tag.id = category.id;)"
-          ),
-          // 'allProducts',
+      // attributes: {
+      include: [
+        sequelize.literal(// Query works properly. Not sure whats going on here. Its returning 500. Syntax is probably all wrong. Researching...
+          "(SELECT COUNT * FROM ecommerce_db.product; SELECT p.id as 'Product ID', p.price as 'Price', p.stock as 'Stock', category.id as 'Cat. ID' ,  Tag.id as 'Tag ID', category.category_name as 'Category'FROM product AS p LEFT JOIN category ON p.category_id = category.id LEFT JOIN tag as Tag ON Tag.id = category.id;)"
+        ),
+        // 'allProducts',
 
-        ],
-      },
+      ],
+      // },
     });
     res.status(200).json(productData);
   } catch (err) {

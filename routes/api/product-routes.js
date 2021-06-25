@@ -76,6 +76,7 @@ router.post('/', (req, res) => {
       }
     ]
   })
+    // ISSUE IS THAT TAGIDS DATA IS NOT BEING PUSHED INTO PRODUCTDATA.DATAVALUES LIKE THE REST OF THE PARAMS. NEED TO FIGURE OUT WHY THE JOIN IS NOT WORKING.
     .then((productData) => {
       console.log("=====")
       console.log(req.body.tagIds)

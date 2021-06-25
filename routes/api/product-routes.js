@@ -6,67 +6,90 @@ const { Product, Category, Tag, ProductTag } = require('../../models');
 
 // get all products
 router.get('/', (req, res) => {
+
   // find all products
   // be sure to include its associated Category and Tag data
+  Product.findAll({
 
-  try {
-    const productData = Product.findAll({
-      // include: [{ model: Product }],
-      // attributes: {
-      include: [
-        sequelize.literal(// Query works properly. Not sure whats going on here. Its returning 500. Syntax is probably all wrong. Researching...
-          "(SELECT COUNT * FROM ecommerce_db.product; SELECT p.id as 'Product ID', p.price as 'Price', p.stock as 'Stock', category.id as 'Cat. ID' ,  Tag.id as 'Tag ID', category.category_name as 'Category'FROM product AS p LEFT JOIN category ON p.category_id = category.id LEFT JOIN tag as Tag ON Tag.id = category.id;)"
-        ),
-        // 'allProducts',
+    include: [
 
-      ],
-      // },
-    });
+      { model: Category },
+      {
+        model: Tag,
+        through: ProductTag
+      }
+    ],
+    // },
+  }).then(productData => {
     res.status(200).json(productData);
-  } catch (err) {
-    console.log("Server error 500")
+  }).catch((err) => {
+    console.log("Server error 500", err)
     res.status(500).json(err);
-  }
+  });
 
 });
 
 // get one product
-// router.get('/:id', (req, res) => {
-//   // find a single product by its `id`
-//   // be sure to include its associated Category and Tag data
-// });
+router.get('/:id', (req, res) => {
+  //   // find a single product by its `id`
+  //   // be sure to include its associated Category and Tag data
+  console.log("============")
+  console.log(JSON.stringify(req.params.id) + " = ID being searched.")
+  console.log("============")
+  let pID = req.params.id;
+
+
+  Product.findAll({
+    where: [{ id: pID }],
+    include: [
+
+      { model: Category },
+      {
+        model: Tag,
+        through: ProductTag
+      }
+    ],
+  }).then(productData => {
+    res.status(200).json(productData);
+  }).catch((err) => {
+    console.log("Server error 500", err)
+    res.status(500).json(err);
+  });
+
+});
 
 // // create new product
-// router.post('/', (req, res) => {
-//   /* req.body should look like this...
-//     {
-//       product_name: "Basketball",
-//       price: 200.00,
-//       stock: 3,
-//       tagIds: [1, 2, 3, 4]
-//     }
-//   */
-//   Product.create(req.body)
-//     .then((product) => {
-//       // if there's product tags, we need to create pairings to bulk create in the ProductTag model
-//       if (req.body.tagIds.length) {
-//         const productTagIdArr = req.body.tagIds.map((tag_id) => {
-//           return {
-//             product_id: product.id,
-//             tag_id,
-//           };
-//         });
-//         return ProductTag.bulkCreate(productTagIdArr);
-//       }
-//       // if no product tags, just respond
-//       res.status(200).json(product);
-//     })
-//     .then((productTagIds) => res.status(200).json(productTagIds))
-//     .catch((err) => {
-//       console.log(err);
-//       res.status(400).json(err);
-//     });
-// });
+router.post('/', (req, res) => {
+  //   /* req.body should look like this...
+  // {
+  //   product_name: "Basketball",
+  //   price: 200.00,
+  //   stock: 3,
+  //   tagIds: [1, 2, 3, 4]
+  // }
+  //   */
+  console.log(req.body, "POST PRODUCT");
+  Product.create(req.body)
+    .then((productData) => {
+      // if there's product tags, we need to create pairings to bulk create in the ProductTag model
+      if (req.body.tagIds.length) {
+        const productTagIdArr = req.body.tagIds.map((tag_id) => {
+          return {
+            product_id: product.id,
+            tag_id,
+          };
+        });
+        return ProductTag.bulkCreate(productTagIdArr);
+      }
+      // if no product tags, just respond
+      res.status(200).json(productData);
+    })
+    .then((productTagIds) => res.status(200).json(productTagIds))
+    .catch((err) => {
+      console.log(err);
+      res.status(400).json(err);
+    });
+});
 
 // update product
 // router.put('/:id', (req, res) => {

@@ -13,7 +13,6 @@ router.get('/', (req, res) => {
   Product.findAll({
 
     include: [
-
       { model: Category },
       {
         model: Tag,
@@ -30,10 +29,10 @@ router.get('/', (req, res) => {
 
 });
 
+
+
 // get one product
 router.get('/:id', (req, res) => {
-  //   // find a single product by its `id`
-  //   // be sure to include its associated Category and Tag data
 
   let pID = req.params.id;
   Product.findAll({
@@ -155,6 +154,5 @@ router.delete('/:id', (req, res) => {
     { where: { id } });
 
   res.status(200).json();
-
 })
 module.exports = router;

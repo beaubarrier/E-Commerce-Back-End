@@ -44,18 +44,14 @@ router.get('/:id', (req, res) => {
 router.post('/', (req, res) => {
   // create a new category
 
-  console.log(req.body, "POST Category");
-  Category.create(req.body, {
+  Category.create(req.body)
+    .then((productData) => {
+      console.log("=====")
+      console.log(productData.dataValue)
+      console.log("=====")
 
-    include: [{ model: Product }]
-
-  }).then((productData) => {
-    console.log("=====")
-    console.log(productData.dataValue)
-    console.log("=====")
-
-    res.status(200).json(productData);
-  })
+      res.status(200).json(productData);
+    })
     .catch((err) => {
       console.log(err);
       res.status(400).json(err);
@@ -64,15 +60,12 @@ router.post('/', (req, res) => {
 
 router.put('/:id', (req, res) => {
   // update a category by its `id` value
+
   let pID = req.params.id;
   Category.update(req.body, {
-    where: [{ id: pID }],
-    // include: [{ model: Product }]
+    where: [{ id: pID }]
   })
     .then((productData) => {
-      console.log("=====")
-      console.log(productData)
-      console.log("=====")
 
       res.status(200).json(productData)
     })
@@ -83,7 +76,13 @@ router.put('/:id', (req, res) => {
 });
 
 router.delete('/:id', (req, res) => {
-  // delete a category by its `id` value6
-});
+  // delete one product by its `id` value
 
+  let id = req.params.id;
+
+  Category.destroy(
+    { where: { id } });
+
+  res.status(200).json();
+})
 module.exports = router;
